@@ -61,20 +61,18 @@ jobs:
 
       - name: Generate SBOM
         run: |
-           trivy fs \
+           trivy fs ${{ matrix.component.path }} \
              --format cyclonedx \
-             --output sbom-${{ matrix.component.name }}.cdx.json \
-             .
+             --output sbom-${{ matrix.component.name }}.cdx.json
 
 
       - name: Scan source code
         run: |
-          trivy fs \ 
+          trivy fs ${{ matrix.component.path }} \
             --format json \
             --output trivy-report-${{ matrix.component.name }}.json \
             --ignore-unfixed \
-            --vuln-type os, library \
-            .
+            --vuln-type os, library
 
         
       - name: Upload SBOM
