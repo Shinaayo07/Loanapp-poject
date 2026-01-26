@@ -66,7 +66,7 @@ jobs:
 
 
       - name: Upload Trivy Scan Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trivy-report-${{ matrix.component.name }}
           path: trivy-report-${{ matrix.component.name }}.json
