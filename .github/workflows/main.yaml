@@ -50,13 +50,14 @@ jobs:
       - name: Generate SBOM for image
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:latest
+          scan-ref: ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:latest
+          scan-type:  'image'
           output: sbom-{{ matrix.component.name }}.json
 
       - name: Scan with trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:latest
+          scan-ref: ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:latest
           format: 'json'
           scan-type: 'image'
           output: trivy-results-${{ matrix.component.name }}.json
