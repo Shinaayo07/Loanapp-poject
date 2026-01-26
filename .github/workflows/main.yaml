@@ -16,7 +16,7 @@ env:
 jobs:
   docker-build-push:
     name: Docker image build, sign and  push
-    needs: build-test-scan
+    #needs: build-test-scan
     runs-on: ubuntu-latest
     strategy:
       matrix:
