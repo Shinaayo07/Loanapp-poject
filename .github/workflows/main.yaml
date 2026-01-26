@@ -116,6 +116,13 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: check pwd 
+        run: |
+          pwd 
+          ls -la 
+
+          ls | grep Dockerfile 
+
       - name: Build docker images
         uses: docker/build-push-action@v4
         with:
