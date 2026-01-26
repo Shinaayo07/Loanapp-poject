@@ -47,6 +47,10 @@ jobs:
           push: false
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:latest
 
+      - name: Save Docker image
+        run: |
+          docker save ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:latest -o ${{ matrix.component.name }}.tar
+
       - name: Generate SBOM for image
         uses: aquasecurity/trivy-action@master
         with:
