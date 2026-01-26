@@ -61,14 +61,14 @@ jobs:
 
       - name: Generate SBOM
         run: |
-           trivy fs ${{ matrix.component.path }} \
+           trivy fs ${{ matrix.component.path }}/main.go \
              --format cyclonedx \
              --output sbom-${{ matrix.component.name }}.cdx.json
 
 
       - name: Scan source code
         run: |
-          trivy fs ${{ matrix.component.path }} \
+          trivy fs ${{ matrix.component.path }}/main.go \
             --format json \
             --output trivy-report-${{ matrix.component.name }}.json \
             --ignore-unfixed \
