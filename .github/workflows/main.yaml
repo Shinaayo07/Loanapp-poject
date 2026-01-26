@@ -45,9 +45,29 @@ jobs:
            go mod download
            go mod verify
 
-      - name: Build project {{ matrix.component.name }}
+      - name: Build project
         run: go build -v main.go
 
-      - name: Run tests for {{ matrix.component.name }}
+      - name: Run tests
         run: go test -v main.go
+
+      #Scan the source code using trivy
+      - name: Scan source code
+        uses: aquascurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'json'
+          output: 'trivy-report-${{ matrix.component.name }}.json'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+
+
+      - name: Upload Trivy Scan Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: trivy-report-${{ matrix.component.name }}
+          path: trivy-report-${{ matrix.component.name }}.json
 
