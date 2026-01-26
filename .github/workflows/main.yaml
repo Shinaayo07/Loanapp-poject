@@ -52,6 +52,20 @@ jobs:
         run: go test -v main.go
 
       #Scan the source code using trivy
+      - name: Install Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          version: latest
+
+      - name: Generate SBOM
+        run: |
+           trivy fs \
+             --format sbom.cdx.json \
+             --format cyclonedx \
+             --output sbom-${{ matrix.component.name }}.cdx.json \
+             .
+
+
       - name: Scan source code
         uses: aquasecurity/trivy-action@master
         with:
@@ -64,6 +78,11 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
 
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ matrix.component.name }}
+          path: sbom-${{ matrix.component.name }}.cdx.json
 
       - name: Upload Trivy Scan Report
         uses: actions/upload-artifact@v4
