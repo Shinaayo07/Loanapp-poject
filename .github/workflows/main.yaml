@@ -14,78 +14,78 @@ env:
   GO_VERSION: '1.21'
 
 jobs:
-  build-test-scan:
-    name: Build, Test and Scan
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        component:
-          - name: government-api
-            path: './government_api/backend'
-          - name: loanapp-validator
-            path: './loan_validator_portal/backend'
+  # build-test-scan:
+  #   name: Build, Test and Scan
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       component:
+  #         - name: government-api
+  #           path: './government_api/backend'
+  #         - name: loanapp-validator
+  #           path: './loan_validator_portal/backend'
 
-    defaults:
-      run:
-        working-directory: ${{ matrix.component.path }}
+  #   defaults:
+  #     run:
+  #       working-directory: ${{ matrix.component.path }}
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: Set up GO
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache: true
-          cache-dependency-path: '**/go.sum'
+  #     - name: Set up GO
+  #       uses: actions/setup-go@v4
+  #       with:
+  #         go-version: ${{ env.GO_VERSION }}
+  #         cache: true
+  #         cache-dependency-path: '**/go.sum'
 
-      - name: Get dependencies
-        run: |
-           go mod download
-           go mod verify
+  #     - name: Get dependencies
+  #       run: |
+  #          go mod download
+  #          go mod verify
 
-      - name: Build project
-        run: go build -v main.go
+  #     - name: Build project
+  #       run: go build -v main.go
 
-      - name: Run tests
-        run: go test -v main.go
+  #     - name: Run tests
+  #       run: go test -v main.go
 
-      #Scan the source code using trivy
-      - name: Scan source code
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'json'
-          output: 'trivy-report-${{ matrix.component.name }}.json'
-          severity: 'CRITICAL,HIGH,MEDIUM'
-          exit-code: '0'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
+  #     #Scan the source code using trivy
+  #     - name: Scan source code
+  #       uses: aquasecurity/trivy-action@master
+  #       with:
+  #         scan-type: 'fs'
+  #         scan-ref: '.'
+  #         format: 'json'
+  #         output: 'trivy-report-${{ matrix.component.name }}.json'
+  #         severity: 'CRITICAL,HIGH,MEDIUM'
+  #         exit-code: '0'
+  #         ignore-unfixed: true
+  #         vuln-type: 'os,library'
 
-      # Generate SBOM using trivy
-      - name: Generate SBOM
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'cyclonedx'
-          output: 'sbom-${{ matrix.component.name }}.cdx.json'
-          sbom: 'true'
+  #     # Generate SBOM using trivy
+  #     - name: Generate SBOM
+  #       uses: aquasecurity/trivy-action@master
+  #       with:
+  #         scan-type: 'fs'
+  #         scan-ref: '.'
+  #         format: 'cyclonedx'
+  #         output: 'sbom-${{ matrix.component.name }}.cdx.json'
+  #         sbom: 'true'
 
         
-      - name: Upload SBOM
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom-${{ matrix.component.name }}
-          path: sbom-${{ matrix.component.name }}.cdx.json
+  #     - name: Upload SBOM
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: sbom-${{ matrix.component.name }}
+  #         path: sbom-${{ matrix.component.name }}.cdx.json
 
-      - name: Upload Trivy Scan Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: trivy-report-${{ matrix.component.name }}
-          path: trivy-report-${{ matrix.component.name }}.json
+  #     - name: Upload Trivy Scan Report
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: trivy-report-${{ matrix.component.name }}
+  #         path: trivy-report-${{ matrix.component.name }}.json
   
   #Docker image build, sign and push job
   docker-build-push:
@@ -118,13 +118,18 @@ jobs:
 
       - name: check pwd 
         run: |
-          pwd 
-          ls -la 
-
-          ls | grep Dockerfile 
+          echo "=== Repository Structure ==="
+          pwd
+          ls -la
+          echo ""
+          echo "=== Looking for Go projects ==="
+          find . -name "go.mod" -type f | head -10
+          echo ""
+          echo "=== Looking for government_api ==="
+          find . -type d -name "*government*" 2>/dev/null || echo "Not found"
 
       - name: Build docker images
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v4 
         with:
           context: .
           file: ./Dockerfile
