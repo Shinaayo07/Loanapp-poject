@@ -39,18 +39,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: check pwd 
-        run: |
-          echo "=== Repository Structure ==="
-          pwd
-          ls -la
-          echo ""
-          echo "=== Looking for Go projects ==="
-          find . -name "go.mod" -type f | head -10
-          echo ""
-          echo "=== Looking for government_api ==="
-          find . -type d -name "*government*" 2>/dev/null || echo "Not found"
-
       - name: Build docker images
         uses: docker/build-push-action@v4 
         with:
@@ -58,3 +46,31 @@ jobs:
           file: ${{ matrix.component.path }}/Dockerfile
           push: false
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:latest
+
+      - name: Generate SBOM for image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image: ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:latest
+          output: sbom-{{ matrix.component.name }}.json
+
+      - name: Scan with trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image: ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:latest
+          format: 'json'
+          output: trivy-results-${{ matrix.component.name }}.json
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'
+          ignore-unfixed: true
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: sbom-${{ matrix.component.name }}
+          path: sbom-{{ matrix.component.name}}.json
+
+      - name: Upload Trivy scan results
+        uses: actions/upload-artifact@v3
+        with:
+          name: trivy-results-${{ matrix.component.name }}
+          path: trivy-results-${{ matrix.component.name }}.json
