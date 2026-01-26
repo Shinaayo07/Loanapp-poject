@@ -57,7 +57,7 @@ jobs:
       - name: Build docker images
         uses: docker/build-push-action@v4 
         with:
-          context: ./Dockerfile
+          context: {{ matrix.component.path }}
           file: ./Dockerfile
           push: false
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:latest
