@@ -56,28 +56,27 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           version: latest
+          scan-type: 'fs'
+          scan-ref: '.'
 
       - name: Generate SBOM
         run: |
            trivy fs \
-             --format sbom.cdx.json \
              --format cyclonedx \
              --output sbom-${{ matrix.component.name }}.cdx.json \
              .
 
 
       - name: Scan source code
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'json'
-          output: 'trivy-report-${{ matrix.component.name }}.json'
-          severity: 'CRITICAL,HIGH,MEDIUM'
-          exit-code: '0'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
+        run: |
+          trivy fs \ 
+            --format json \
+            --output trivy-report-${{ matrix.component.name }}.json \
+            --ignore-unfixed \
+            --vuln-type os, library \
+            .
 
+        
       - name: Upload SBOM
         uses: actions/upload-artifact@v4
         with:
