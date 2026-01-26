@@ -59,16 +59,28 @@ jobs:
           scan-type: 'fs'
           scan-ref: '.'
 
+      - name: Debug repository structure
+        run: |
+          echo "=== Repository Structure ==="
+          pwd
+          ls -la
+          echo ""
+          echo "=== Looking for Go projects ==="
+          find . -name "go.mod" -type f | head -10
+          echo ""
+          echo "=== Looking for government_api ==="
+          find . -type d -name "*government*" 2>/dev/null || echo "Not found"
+
       - name: Generate SBOM
         run: |
-           trivy fs ${{ matrix.component.path }}/main.go \
+           trivy fs ${{ matrix.component.path }} \
              --format cyclonedx \
              --output sbom-${{ matrix.component.name }}.cdx.json
 
 
       - name: Scan source code
         run: |
-          trivy fs ${{ matrix.component.path }}/main.go \
+          trivy fs ${{ matrix.component.path }} \
             --format json \
             --output trivy-report-${{ matrix.component.name }}.json \
             --ignore-unfixed \
