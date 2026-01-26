@@ -50,14 +50,15 @@ jobs:
       - name: Generate SBOM for image
         uses: aquasecurity/trivy-action@master
         with:
-          image: ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:latest
+          image-ref: ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:latest
           output: sbom-{{ matrix.component.name }}.json
 
       - name: Scan with trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image: ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:latest
+          image-ref: ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:latest
           format: 'json'
+          scan-type: 'image'
           output: trivy-results-${{ matrix.component.name }}.json
           severity: 'CRITICAL,HIGH'
           exit-code: '0'
