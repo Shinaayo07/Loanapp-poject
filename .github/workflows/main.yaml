@@ -52,39 +52,27 @@ jobs:
         run: go test -v main.go
 
       #Scan the source code using trivy
-      - name: Install Trivy
+      - name: Scan source code
         uses: aquasecurity/trivy-action@master
         with:
-          version: latest
           scan-type: 'fs'
           scan-ref: '.'
+          format: 'json'
+          output: 'trivy-report-${{ matrix.component.name }}.json'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
 
-      - name: Debug repository structure
-        run: |
-          echo "=== Repository Structure ==="
-          pwd
-          ls -la
-          echo ""
-          echo "=== Looking for Go projects ==="
-          find . -name "go.mod" -type f | head -10
-          echo ""
-          echo "=== Looking for government_api ==="
-          find . -type d -name "*government*" 2>/dev/null || echo "Not found"
-
+      # Generate SBOM using trivy
       - name: Generate SBOM
-        run: |
-           trivy fs ./main.go \
-             --format cyclonedx \
-             --output sbom-${{ matrix.component.name }}.cdx.json
-
-
-      - name: Scan source code
-        run: |
-          trivy fs ./main.go \
-            --format json \
-            --output trivy-report-${{ matrix.component.name }}.json \
-            --ignore-unfixed \
-            --pkg-types os, library
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'cyclonedx'
+          output: 'sbom-${{ matrix.component.name }}.cdx.json'
+          sbom: 'true'
 
         
       - name: Upload SBOM
