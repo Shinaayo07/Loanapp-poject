@@ -53,7 +53,7 @@ jobs:
 
       #Scan the source code using trivy
       - name: Scan source code
-        uses: aquascurity/trivy-action@master
+        uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
           scan-ref: '.'
