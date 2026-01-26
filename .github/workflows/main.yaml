@@ -64,13 +64,13 @@ jobs:
           ignore-unfixed: true
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: sbom-${{ matrix.component.name }}
           path: sbom-{{ matrix.component.name}}.json
 
       - name: Upload Trivy scan results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trivy-results-${{ matrix.component.name }}
           path: trivy-results-${{ matrix.component.name }}.json
