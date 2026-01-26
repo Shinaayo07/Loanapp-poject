@@ -25,9 +25,6 @@ jobs:
             path: './government_api/backend'
           - name: loanapp-validator
             path: './loan_validator_portal/backend'
-    defaults:
-      run:
-        working-directory: ${{ matrix.component.path }}
 
     steps:
       - name: Checkout code
@@ -57,7 +54,7 @@ jobs:
       - name: Build docker images
         uses: docker/build-push-action@v4 
         with:
-          context: './government_api/backend'
-          file: ./Dockerfile
+          context: ${{ matrix.component.path }}
+          file: ${{ matrix.component.path }}/Dockerfile
           push: false
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:latest
