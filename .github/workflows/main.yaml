@@ -54,6 +54,6 @@ jobs:
           outputs: type=docker, dest=/tmp/${{ matrix.component.name }}.tar
 
       - name: Load image for Scanning and signing
-        run: docker load -i /tmp/${ { matrix.component.name } }.tar
+        run: docker load -i /tmp/${{ matrix.component.name }}.tar
 
       
