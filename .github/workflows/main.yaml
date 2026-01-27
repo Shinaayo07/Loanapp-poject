@@ -55,5 +55,23 @@ jobs:
 
       - name: Load image for Scanning and signing
         run: docker load -i /tmp/${{ matrix.component.name }}.tar
+     
+      - name: Scan Docker image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'image'
+          scan-ref: '${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:v1'
+          format: 'json'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          output: 'trivy-results-${{ matrix.component.name }}.json'
+          exit-code: '0'
+          ignore-unfixed: true
 
+      - name: Generate SBOM
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'image'
+          scan-ref: '${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:v1'
+          format: 'cyclonedx'
+          output: 'sbom-${{ matrix.component.name }}.json'
       
