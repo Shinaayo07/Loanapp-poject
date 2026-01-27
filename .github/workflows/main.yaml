@@ -51,5 +51,9 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:v1
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          outputs: type=docker, dest=/tmp/${{ matrix.component.name }}.tar
+
+      - name: Load image for Scanning and signing
+        run: docker load -i /tmp/${ { matrix.component.name } }.tar
 
       
