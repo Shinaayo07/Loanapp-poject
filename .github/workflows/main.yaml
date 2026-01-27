@@ -159,14 +159,14 @@ jobs:
       - name: Upload trivy results
         uses: actions/upload-artifact@v4
         with:
-          name: trivy-results-${{ matrix.component.name }}
-          path: trivy-results-${{ matrix.component.name }}.json
+          name: trivy-image-results-${{ matrix.component.name }}
+          path: trivy-image-results-${{ matrix.component.name }}.json
 
       - name: Upload SBOM
         uses: actions/upload-artifact@v4
         with:
-          name: sbom-${{ matrix.component.name }}
-          path: sbom-${{ matrix.component.name }}.json
+          name: sbom-image-${{ matrix.component.name }}
+          path: sbom-image-${{ matrix.component.name }}.json
 
       - name: Set up Cosign
         uses: sigstore/cosign-installer@main
