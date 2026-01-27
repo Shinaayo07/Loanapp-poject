@@ -55,6 +55,9 @@ jobs:
 
       - name: Load image for Scanning and signing
         run: docker load -i /tmp/${{ matrix.component.name }}.tar
+
+      - name: Verify docker images
+        run: docker images
      
       - name: Scan Docker image with Trivy
         uses: aquasecurity/trivy-action@master
