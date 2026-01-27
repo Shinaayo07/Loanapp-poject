@@ -140,7 +140,7 @@ jobs:
           scan-ref: '${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:v1'
           format: 'json'
           severity: 'CRITICAL,HIGH,MEDIUM'
-          output: 'trivy-results-${{ matrix.component.name }}.json'
+          output: 'trivy-image-results-${{ matrix.component.name }}.json'
           exit-code: '0'
           ignore-unfixed: true
 
@@ -150,7 +150,7 @@ jobs:
           scan-type: 'image'
           scan-ref: '${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:v1'
           format: 'cyclonedx'
-          output: 'sbom-${{ matrix.component.name }}.json'
+          output: 'sbom-image-${{ matrix.component.name }}.json'
       
       - name: Push Image to dockerhub
         run: |
