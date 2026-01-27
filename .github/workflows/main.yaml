@@ -78,3 +78,16 @@ jobs:
           format: 'cyclonedx'
           output: 'sbom-${{ matrix.component.name }}.json'
       
+      - name: Set up Cosign
+        uses: sigstore/cosign-installer@main
+
+      - name: Write Cosign Key
+        env: 
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+        run: 'echo "${{ secrets.COSIGN_PRIVATE_KEY }}" > cosign.key'
+
+      - name: sign Docker image
+        env:
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }} 
+        run: |
+           cosign sign --key consign.key ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:v1
