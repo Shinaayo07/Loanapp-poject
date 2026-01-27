@@ -39,48 +39,8 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Docker image
-        id: build-image
-        env:
-          IMAGE_NAME: ${{ matrix.component.name }}
+      - name: Build docker image
         run: |
-          docker build \
-            --build-arg IMAGE_NAME=${{ matrix.component.name }} \
-            -f ${{ matrix.component.dockerfile }} \
-            -t ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:${{ matrix.component.name }} \
-            ${{ matrix.component.context }}
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/{{ matrix.component.name }}:v1 -f {{ matrix.component.path }}/Dockerfile
 
-      - name: Save Docker image
-        run: |
-          docker save ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:${{ matrix.component.name }} -o ${{ matrix.component.name }}.tar
-
-      - name: Generate SBOM for image
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-ref: ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:${{ matrix.component.name }}
-          scan-type:  'image'
-          format: 'cyclonedx'
-          output: sbom-${{ matrix.component.name }}.json
-
-      - name: Scan with trivy
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-ref: ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:${{ matrix.component.name }}
-          format: 'json'
-          scan-type: 'image'
-          output: trivy-results-${{ matrix.component.name }}.json
-          severity: 'CRITICAL,HIGH'
-          exit-code: '0'
-          ignore-unfixed: true
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom-${{ matrix.component.name }}
-          path: sbom-${{ matrix.component.name}}.json
-
-      - name: Upload Trivy scan results
-        uses: actions/upload-artifact@v4
-        with:
-          name: trivy-results-${{ matrix.component.name }}
-          path: trivy-results-${{ matrix.component.name }}.json
+      
