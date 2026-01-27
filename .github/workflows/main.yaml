@@ -78,6 +78,22 @@ jobs:
           format: 'cyclonedx'
           output: 'sbom-${{ matrix.component.name }}.json'
       
+      - name: Push Image to dockerhub
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:v1
+
+      - name: Upload trivy results
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-results-${{ matrix.component.name }}
+          path: trivy-results-${{ matrix.component.name }}.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ matrix.component.name }}
+          path: sbom-${{ matrix.component.name }}.json
+
       - name: Set up Cosign
         uses: sigstore/cosign-installer@main
 
@@ -90,4 +106,4 @@ jobs:
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }} 
         run: |
-           cosign sign --key consign.key --local --yes ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:v1
+           cosign sign --key consign.key ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:v1
