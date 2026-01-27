@@ -106,4 +106,4 @@ jobs:
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }} 
         run: |
-           cosign sign --key consign.key ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:v1
+           cosign sign --key cosign.key ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:v1
