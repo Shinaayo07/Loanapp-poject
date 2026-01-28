@@ -1,0 +1,145 @@
+services:
+  loan-validator:
+    image: shina371/loanapp-validator:v1
+    container_name: loan_validator
+    ports:
+      - 8080:8080
+    depends_on:
+      db-setup:
+        condition: service_completed_successfully
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=loan_validator_db
+      - PORT=8080
+      - GOV_BANK_URL=http://government_api:8081
+      - OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
+      - ENV=development
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - loanapp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  government_api:
+    image: shina371/government-api:v1
+    container_name: government_api
+    depends_on:
+      postgres:
+        condition: service_healthy
+      db-setup:
+        condition: service_completed_successfully
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=government_loan_db
+      - PORT=8081
+      - ENV=production 
+    ports:
+      - 8081:8081
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - loanapp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+  
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - loanapp-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  db-setup:
+    image: postgres:15-alpine
+    container_name: db-setup
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - PGPASSWORD=postgres
+    entrypoint: ["/bin/bash", "-c"]
+    volumes:
+      - ../government_api/database/schema.sql:/schemas/validator.sql:ro
+      - ../loan_validator_portal/database/schema.sql:/schemas/government.sql:ro
+    command: |
+      set -e
+      echo "Creating databases if not exist..."
+
+      psql -h postgres -U postgres -tc "SELECT 1 FROM pg_database WHERE datname='loan_validator_db'" | grep -q 1 \
+        || psql -h postgres -U postgres -c "CREATE DATABASE loan_validator_db;"
+
+      psql -h postgres -U postgres -tc "SELECT 1 FROM pg_database WHERE datname='government_loan_db'" | grep -q 1 \
+        || psql -h postgres -U postgres -c "CREATE DATABASE government_loan_db;"
+
+      echo "Running schema migrations..."
+
+      psql -h postgres -U postgres -d loan_validator_db < /schemas/validator.sql
+      psql -h postgres -U postgres -d government_loan_db < /schemas/government.sql
+
+      echo "Database initialization completed."
+    networks:
+      - loanapp-network
+    restart: "no"
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ../otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+      - "8888:8888" # Metrics
+      - "8889:8889" # Health check/extension
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - loanapp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:13133"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  loanapp-network:
+    driver: bridge
+
+volumes:
+  db-data:
+
+  
+       
