@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: loan-validator-config
+  namespace: loan-validator-ns
+data:
+  DB_HOST: "postgres-svc.postgres-ns.svc.cluster.local"
+  DB_PORT: "5432"
+  DB_USER: "postgres"
+  DB_NAME: "loan_validator_db"
+  PORT: "8080"
+  GOV_BANK_URL: "http://government-api-svc.government-api-ns.svc.cluster.local:8081"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "otel-svc.otel-ns.svc.cluster.local:4317"
+  ENV: "production"

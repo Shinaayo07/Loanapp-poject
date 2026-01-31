@@ -1,0 +1,21 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: government-api-role
+  namespace: government-api-ns
+rules:
+#Allows to read configmap and secret
+- apiGroups: [""] # "" indicates the core API group
+  resources: ["configmaps", "secrets"]
+  resourceNames: ["government-api-config", "government-api-secret"]
+  verbs: ["get", "list"]
+#Allow to read services
+- apiGroups: [""]
+  resources: ["services"]
+  resourceNames: ["government-api-svc", "potgres-svc"]
+  verbs: ["get", "list"]
+#Allow to read endpoints for service discovery
+- apiGroups: [""]
+  resources: ["endpoints"]
+  verbs: ["get", "list"]
+  

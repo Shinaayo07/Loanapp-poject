@@ -1,0 +1,11 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: government-api-deny-all
+  namespace: government-api-ns
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress

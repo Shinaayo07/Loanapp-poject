@@ -1,0 +1,17 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: postgres-role
+  namespace: postgres-ns
+rules:
+#Allows to read configmap and secret
+- apiGroups: [""] # "" indicates the core API group
+  resources: ["configmaps", "secrets"]
+  resourceNames: ["postgres-config", "postgres-secret"]
+  verbs: ["get", "list"]
+#Allow to read services
+- apiGroups: [""]
+  resources: ["services"]
+  resourceNames: [ "potgres-svc"]
+  verbs: ["get", "list"]
+  

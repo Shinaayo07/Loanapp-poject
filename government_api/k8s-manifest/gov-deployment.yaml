@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: government-api-deployment
+  namespace: government-api-ns
+  labels:
+    app: government-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: government-api
+  template:
+    metadata:
+      labels:
+        app: government-api
+    spec:
+      serviceAccountName: government-api-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      hostNetwork: false #Ensure host network is disabled
+      hostPID: false   #Ensure host PID namespace is disabled
+      hostIPC: false   #Ensure host IPC namespace is disabled
+      containers:
+      - name: government-api
+        image: docker.io/shina371/government-api:v1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8081
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: var-run
+          mountPath: /var/run
+        envFrom:
+          - configMapRef:
+             name: government-api-config
+          - secretRef:
+             name: government-api-secret
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8081
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: var-run
+        emptyDir: {}     
+
+

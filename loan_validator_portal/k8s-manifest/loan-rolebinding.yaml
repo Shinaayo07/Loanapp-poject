@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: loan-validator-rb
+  namespace: loan-validator-ns
+subjects:
+- kind: ServiceAccount
+  name: loan-validator-sa
+  namespace: loan-validator-ns
+roleRef:
+  kind: Role
+  name: loan-validator-role
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: loan-validator-sa
+  namespace: loan-validator-ns
+  labels:
+    app: loan-validator
+    component: serviceaccount

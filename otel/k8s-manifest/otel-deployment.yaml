@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-deployment
+  Namespace: otel-ns
+  labels:
+    app: otel
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: otel
+  template:
+    metadata:
+      labels:
+        app: otel
+    spec:
+      serviceAccountName: otel-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+        runAsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      hostNetwork: false #Ensure host network is disabled
+      hostPID: false   #Ensure host PID namespace is disabled
+      hostIPC: false   #Ensure host IPC namespace is disabled
+      containers:
+      - name: loan-validator
+        image: otel/opentelemetry-collector-contrib:latest
+        command:
+        - "/otelcol-contrib"
+        - --config=/conf/otel-collector-config.yaml
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 4317
+          name: otlp-grpc
+        - containerPort: 4318
+          name: otlp-http
+        - containerPort: 13133
+          name: health 
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - name: otel-collector-config
+          mountPath: /conf
+        env:
+        - name: DD_API_KEY
+          valueFrom: 
+           secretKeyRef:
+              name: otel-secret
+              key: app-key
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 13133
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 13133
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+      volumes:
+      - name: otel-collector-config
+        configMap:
+          name: otel-collector-config
+          items:
+          - key: otel-collector-config.yaml
+            path: otel-collector-config.yaml  
+
+

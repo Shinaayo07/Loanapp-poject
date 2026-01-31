@@ -1,0 +1,29 @@
+# Allow PostgreSQL traffic
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-network-allow
+  namespace: postgres-ns
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: government-api-ns
+    ports:
+    - protocol: TCP
+      port: 5432
+
+  - from:
+    -  namespaceSelector:
+        matchLabels:
+          name: loan-validator-ns
+    ports:
+    - protocol: TCP
+      port: 5432
+         

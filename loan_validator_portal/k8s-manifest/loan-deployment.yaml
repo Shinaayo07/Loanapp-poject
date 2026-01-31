@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loan-validator-deployment
+  namespace: loan-validator-ns
+  labels:
+    app: loan-validator
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: loan-validator
+  template:
+    metadata:
+      labels:
+        app: loan-validator
+    spec:
+      serviceAccountName: loan-validator-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      hostNetwork: false #Ensure host network is disabled
+      hostPID: false   #Ensure host PID namespace is disabled
+      hostIPC: false   #Ensure host IPC namespace is disabled
+      containers:
+      - name: loan-validator
+        image: shina371/loanapp-validator:v1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8081
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: var-run
+          mountPath: /var/run
+        envFrom:
+          - configMapRef:
+             name: loan-validator-config
+          - secretRef:
+             name: loan-validator-secret
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: var-run
+        emptyDir: {}     
+
+

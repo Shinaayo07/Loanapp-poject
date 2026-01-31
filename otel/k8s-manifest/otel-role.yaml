@@ -1,0 +1,31 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: otel-role
+  namespace: otel-ns
+rules:
+# Core permissions (REQUIRED for k8sattributes processor)
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list"]
+
+
+# Optional: For service discovery (if using)
+- apiGroups: [""]
+  resources: ["service"]
+  resourceName: ["otel-svc", "loan-validator-svc"]
+  verbs: ["get", "list", "watch"]
+
+# Optional: ConfigMaps (if reading configs)
+- apiGroups: [""]
+  resources:
+  - configmaps
+  verbs: ["get"]
+  resourceNames: ["otel-config"]  # Specific only
+
+# Optional: Secrets (if reading secrets)
+- apiGroups: [""]
+  resources:
+  - secrets
+  verbs: ["get"]
+  resourceNames: ["otel-secrets"]  # Specific only

@@ -1,0 +1,11 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: loan-validator-deny-all
+  namespace: loan-validator-ns
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress

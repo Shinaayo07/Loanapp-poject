@@ -1,0 +1,21 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: loan-validator-role
+  namespace: loan-validator-ns
+rules:
+#Allows to read configmap and secret
+- apiGroups: [""] # "" indicates the core API group
+  resources: ["configmaps", "secrets"]
+  resourceNames: ["loan-validator-config", "loan-validator-secret"]
+  verbs: ["get", "list"]
+#Allow to read services
+- apiGroups: [""]
+  resources: ["services"]
+  resourceNames: ["loan-validator-svc", "potgres-svc", "government-api-svc"]
+  verbs: ["get", "list"]
+#Allow to read endpoints for service discovery
+- apiGroups: [""]
+  resources: ["endpoints"]
+  verbs: ["get", "list"]
+  

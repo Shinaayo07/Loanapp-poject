@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: loan-validator-svc
+  namespace: loan-validator-ns
+  labels:
+    app: loan-validator
+spec:
+  type: ClusterIP
+  selector:
+    app: loan-validator
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
