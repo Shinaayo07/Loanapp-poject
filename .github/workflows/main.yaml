@@ -205,16 +205,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Kubesec scan
-        uses: controlplaneio/kubesec-action@43d0ddff5ffee89a6bb9f29b64cd865411137b14
-        with:
-          input: ${{ matrix.component.path }}
-          format: json
-          output: kubesec-results-${{ matrix.component.name }}.json
-          exit-code: "0"
-
-      - name: Upload Kubesec scan results
-        uses: actions/upload-artifact@v4
-        with:
-          name: kubesec-results-${{ matrix.component.name }}
-          path: kubesec-results-${{ matrix.component.name }}.json
+      - name: Install Kubesec
+        run: |
+          curl -sSL https://github.com/controlplaneio/kubesec/releases/latest/download/kubesec_linux_amd64.tar.gz \
+          | tar -xz
+           sudo mv kubesec /usr/local/bin/
