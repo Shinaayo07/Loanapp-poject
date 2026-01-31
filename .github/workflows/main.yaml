@@ -181,3 +181,40 @@ jobs:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }} 
         run: |
            cosign sign --key cosign.key ${{ secrets.DOCKER_USERNAME }}/${{ matrix.component.name }}:v1
+
+  #Kubernetes manifest scanning
+  kube-manifest-scan:
+    name: Kubernetes scan using kubesec
+    runs-on: ubuntu-latest
+    needs: docker-build-push
+    permissions:
+      actions: read
+      contents: read
+    strategy:
+      matrix:
+        component:
+          - name: government-api
+            path: './government_api/k8s-manifest/'
+          - name: loanapp-validator
+            path: './loan_validator_portal/k8s-manifest/'
+          - name: otel
+            path: './otel/k8s-manifest/'
+          - name: postgres
+            path: './postgres/k8s-manifest/'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Kubesec scan
+        uses: controlplaneio/kubesec-action@43d0ddff5ffee89a6bb9f29b64cd865411137b14
+        with:
+          input: ${{ matrix.component.path }}
+          format: json
+          output: kubesec-results-${{ matrix.component.name }}.json
+          exit-code: "0"
+
+      - name: Upload Kubesec scan results
+        uses: actions/upload-artifact@v4
+        with:
+          name: kubesec-results-${{ matrix.component.name }}
+          path: kubesec-results-${{ matrix.component.name }}.json
