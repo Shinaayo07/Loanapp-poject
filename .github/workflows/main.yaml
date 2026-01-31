@@ -210,3 +210,13 @@ jobs:
           curl -sSL https://github.com/controlplaneio/kubesec/releases/latest/download/kubesec_linux_amd64.tar.gz \
           | tar -xz
            sudo mv kubesec /usr/local/bin/
+
+      - name: Scan Kubernetes manifests
+        run: |
+           mkdir -p kubesec-results
+
+           find "${{ matrix.component.path }}" \
+             -type f \( -name "*.yaml" -o -name "*.yml" \) |
+           while IFS= read -r file; do
+              kubesec scan "$file" --format json
+           done > kubesec-results/kubesec-report.json
