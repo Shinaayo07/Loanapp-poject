@@ -236,7 +236,7 @@ jobs:
       - name: Run Kubelinter
         run: |
           kube-linter lint "${{ matrix.component.path }}" \
-           --format json --output-file kube-linter-report.json || true
+           --format json >> kube-linter-report.json || true
 
       - name: Upload Kubelinter report
         uses: actions/upload-artifact@v4
