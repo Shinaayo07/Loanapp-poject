@@ -219,3 +219,9 @@ jobs:
            while IFS= read -r -d '' file; do
               kubesec scan "$file" --format json || true
            done >> kubesec-report.json
+
+      - name: Upload Kubesec report
+        uses: actions/upload-artifact@v4
+        with:
+          name: kubesec-report.json
+          path: kubesec-report.json
