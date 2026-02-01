@@ -231,6 +231,6 @@ jobs:
         uses: stackrox/kube-linter-action@v1
         with:
           directory: ${{ matrix.component.path }}
-          fail-on-error: false
+          exit-code: "0"
           format: json
-          output-file: kube-linter-report-${{ matrix.component.name }}.json
+          output: kube-linter-report-${{ matrix.component.name }}.json
