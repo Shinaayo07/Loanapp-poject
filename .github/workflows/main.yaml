@@ -212,9 +212,10 @@ jobs:
            sudo mv kubesec /usr/local/bin/
 
       - name: Scan Kubernetes manifests
+        shell: bash
         run: |
            find "${{ matrix.component.path }}" \
-             -type f \( -name "*.yaml" -o -name "*.yml" \) |
-           while IFS= read -r file; do
+             -type f \( -name "*.yaml" -o -name "*.yml" \) -print0 |
+           while IFS= read -r -d '' file; do
               kubesec scan "$file" --format json
            done >> kubesec-report.json
