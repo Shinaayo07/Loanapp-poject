@@ -227,10 +227,17 @@ jobs:
           path: kubesec-report.json
 
       #Checking for k8s manifest misconfigurations using kubelinter
-      - name: Scan k8s-manifest
-        uses: stackrox/kube-linter-action@v1
+      - name: Run kube-linter
+        shell: bash
+        run: |
+           stackrox/kube-linter-action@v1 \
+             --directory "${{ matrix.component.path }}" \
+             --format json \
+             --output-file kube-linter-report.json || true
+
+             
+      - name: Upload Kubelinter report
+        uses: actions/upload-artifact@v4
         with:
-          directory: ${{ matrix.component.path }}
-          exit-code: "0"
-          format: json
-          output: kube-linter-report-${{ matrix.component.name }}.json
+          name: kube-linter-report-${{ matrix.component.name }}
+          path: kube-linter-report.json
