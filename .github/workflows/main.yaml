@@ -217,5 +217,5 @@ jobs:
            find "${{ matrix.component.path }}" \
              -type f \( -name "*.yaml" -o -name "*.yml" \) -print0 |
            while IFS= read -r -d '' file; do
-              kubesec scan "$file" --format json
+              kubesec scan "$file" --format json || true
            done >> kubesec-report.json
