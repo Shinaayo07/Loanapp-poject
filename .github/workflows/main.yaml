@@ -225,3 +225,12 @@ jobs:
         with:
           name: kubesec-report-${{ matrix.component.name }}
           path: kubesec-report.json
+
+      #Checking for k8s manifest misconfigurations using kubelinter
+      - name: Scan k8s-manifest
+        uses: stackrox/kube-linter-action@v1
+        with:
+          directory: ${{ matrix.component.path }}
+          fail-on-error: false
+          format: json
+          output-file: kube-linter-report-${{ matrix.component.name }}.json
