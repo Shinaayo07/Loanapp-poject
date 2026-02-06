@@ -39,10 +39,8 @@ jobs:
 
       - name: Terraform fmt status
         if: steps.fmt.outcome == 'failure'
-        run: echo "Terraform fmt failed. Please check the output above for details." && \
-             terraform fmt -recursive && \
-             echo "Terraform fmt has been applied. Please commit the changes and try again."
-
+        run: echo "Terraform fmt failed. Please check the output above for details." && terraform fmt 
+        
       - name: Terraform Validate
         run: terraform validate
 
