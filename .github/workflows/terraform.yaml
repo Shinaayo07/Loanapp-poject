@@ -2,8 +2,7 @@ name: Terraform EKS apply
 on:
   workflow_dispatch:
 
-Permissions:
-  contents: read
+
 
 env:
   AWS_REGION: us-east-1
