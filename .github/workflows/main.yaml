@@ -3,7 +3,7 @@ on:
  push:
     branches:
       - main
-    path:
+    paths:
       - 'government_api/**'
       - 'loan_validator_portal/**'
       - 'otel/**'
