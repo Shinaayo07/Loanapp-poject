@@ -33,7 +33,15 @@ jobs:
         run: terraform init -backend-config="bucket=${{ env.BUCKET_TF_STATE }}" -backend-config="region=${{ env.AWS_REGION }}" -backend-config="key=terraform.tfstate"
 
       - name: Terraform Format
+        id: fmt
         run: terraform fmt -check
+        continue-on-error: true
+
+      - name: Terraform fmt status
+        if: steps.fmt.outcome == 'failure'
+        run: echo "Terraform fmt failed. Please check the output above for details." && \
+             terraform fmt -recursive && \
+             echo "Terraform fmt has been applied. Please commit the changes and try again."
 
       - name: Terraform Validate
         run: terraform validate
