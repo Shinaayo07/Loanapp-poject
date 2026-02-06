@@ -32,8 +32,8 @@ module "eks" {
       disk_size      = 20
 
       desired_capacity = 2
-      max_capacity     = 3
-      min_capacity     = 1
+      max_capacity     = 4
+      min_capacity     = 2
 
       iam_role_additional_policies = {
         AmazonEBSCSIDriverPolicy = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
